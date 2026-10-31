@@ -11,6 +11,7 @@ def classify_temp(c: float) -> str:
         return "mild"
     else:
         return "hot"
+    
 
 def main() -> None:
     # >10 = 宽度 10、右对齐（数字右对齐才好看）
@@ -23,3 +24,7 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+
+
