@@ -1,0 +1,12 @@
+{
+  "project": "de-journey",
+  "db": {
+    "host": "localhost",
+    "port": 5433
+  },
+  "cities": [
+    "wuhan",
+    "paris"
+  ],
+  "updated_at": "2026-11-01T14:07:42"
+}
