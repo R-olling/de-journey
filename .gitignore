@@ -1,3 +1,6 @@
 .venv/
 __pycache__/
 *.pyc
+
+# 草稿本，不入库
+week0/play.py
