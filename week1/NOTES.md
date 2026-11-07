@@ -16,6 +16,15 @@
 - 错误填法实测：中位数 5.0（满分）→ 均值 4.200 变 4.723、5 分评价 5,719 变 26,528，**全程零报错零警告**。
 - 两条不许忘：`dropna()` 不加参数静默删掉 65% 数据；以后看别人的 notebook，先搜 `dropna()` 再信他的结论。
 
+## 11/7 收工记录
+
+- 补完 11/6 的骨架任务，并完成今天 §2.4 全部内容（Q5 分布检查按止损线砍掉）。
+- `python week1\clean.py` 实测：`31801 → 31565(删 236) → 31502(删 63)`；7 KPI = `31502 / 10972 / 0.348 / 0.619 / 0.381 / 72.258 / 4.199`，与 capstone `metrics.json` 逐个一致。
+- 三份交付物已生成：`fact_requests.parquet` / `fact_requests.csv` / `dim_district.parquet`。
+- 今天卡在哪：merge 概念（左右表、`validate="m:1"`、`how="left"` 与默认 inner、`indicator`、多对一怎么落地）连问多轮。真实原因是「键 / 行数为什么会变」此前完全没有体感；好处是逐层问透后实验 2/3 一次跑对。耗时比排期多约 1 小时，靠砍 Q5 + 由助手代写 clean.py 实现追回。
+- 收尾处理：notebook 末尾补了「四实验判据汇总」markdown 与模块验证 cell（`from clean import ...`）；故意报错的 validate cell 改成 try/except 打印，避免 Restart & Run All 被中断。
+- 待办（11/8 交付日，**不写新功能**）：六问结论补进 `answers.md`、Q6 格式对比、README 更新、分支 → PR → 合并、闭卷小测。
+
 ## 进度快照（11/05 13:04，学校停电检修，临时离开）
 
 **已完成**
