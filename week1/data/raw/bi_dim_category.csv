@@ -1,0 +1,9 @@
+﻿cat,cat_label,department
+other,Other,Citizen Services
+noise,Noise,Environment & Noise
+green_space,Green space,Parks
+road_damage,Road damage,Roads & Lighting
+streetlight,Streetlight,Roads & Lighting
+illegal_dumping,Illegal dumping,Waste & Cleanliness
+waste_collection,Waste collection,Waste & Cleanliness
+water_leak,Water leak,Water

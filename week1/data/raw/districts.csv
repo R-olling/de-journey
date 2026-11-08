@@ -1,0 +1,13 @@
+district_id,district_name,profile,area_km2,population_2024,population_2025,centroid_lat,centroid_lon
+D01,Greenhill,Green residential area around a large park,27.8,95000,95400,31.10989,-39.97339
+D02,Northgate,Dense residential neighbourhood,26.1,210000,210400,31.11085,-39.92172
+D03,University Park,University campus and student housing,26.9,120000,121200,31.11202,-39.86872
+D04,Eastport,Industrial and logistics zone,25.8,85000,84600,31.11156,-39.81538
+D05,Westfield,Low-density suburban housing,17.1,110000,111300,31.06798,-39.97523
+D06,Old Town,"Historic centre, shops and tourism",18.8,160000,159500,31.06882,-39.92515
+D07,Financial District,Offices and business towers,23.6,60000,60000,31.0709,-39.86771
+D08,Market Quarter,Older mixed commercial and residential area,17.6,150000,149700,31.06877,-39.81404
+D09,Lakeside,Quiet residential area by the lake,26.5,90000,90500,31.02451,-39.97607
+D10,Riverside,"Mixed area along the river, leisure and housing",27.7,130000,130500,31.02575,-39.92619
+D11,Southbank,Residential neighbourhood south of the river,34.3,175000,175500,31.02675,-39.8697
+D12,New Harbour,New town under development (new metro line in 2025),25.4,70000,91000,31.02512,-39.81538
