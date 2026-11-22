@@ -4,7 +4,7 @@
 
 ## 做成了什么（可验证）
 
-- **4 个单元**：week0/1 环境与 pandas、week2 SQL、week3 管道、week4 运维；仓库 40 个 commit（`main` 26 + week4 分支 7，PR 合并后计入主干）。
+- **4 个单元**：week0/1 环境与 pandas、week2 SQL、week3 管道、week4 运维；仓库 **41** 个 commit（`main` 26 + `week3/pipeline` 7 + `week4/ops` 8，PR 合并后计入主干）。
 - **一条能每天自己跑的管道**：600 → **656** 行，8 城 × 82 天，**14 条**校验（pre 8 + post 6），**4 级**退出码（0/1/2/3 全演过）。
 - **一套运维证据**：`ops.pipeline_run` 6 行、`ops.check_result` 70 行（1 条失败）、计划任务 `LastTaskResult=0x0`、日志 `week4/logs/daily-*.log`。
 - **一套能讲的东西**：3 行简历、5 个面试问答（各带一层追问）、5 条 ADR、一份数据契约、一份事故记录、闭卷小测 5 题。
