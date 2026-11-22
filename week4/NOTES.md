@@ -90,7 +90,28 @@ ERROR ENV 缺 D:\code\de-journey\week3\.env：从 .env.example 复制并填 PG_P
 
 **盲写时才想明白的一件事**：`isinstance(pd.Timestamp(...), datetime.date)` 是 **True**——所以"先判 date"的顺序会让 Timestamp 原样通过（发给 `date` 列时 Postgres 隐式转换，不报错，但 `type(x).__name__` 是 `Timestamp`）。真实管道里 `date_key` 已经是 `date`，所以两者跑起来一样；差别只在"有人直接喂 DataFrame"的时候。计划 §2.6 的用例正是要抓这个。
 
-## 2. ops 记账实况（2026-11-22 16:00）
+## 2. clone 自测发现的一个文档缺口（计划 §2.7 ③）
+
+假装自己是别人：`git clone -b week4/ops` 到 `D:\code\_u4_clone`，`python -m venv .venv` + `pip install -r requirements.txt`（2 分 23 秒，有缓存），建 `weather_clone` 库，跑 `init.sql`（8 城 / 365 天日历）+ `ops.sql`，然后照 README 跑：
+
+```text
+python week4\run_daily.py --reuse-raw
+→ load stg=56 fact_total=56   ← 不是计划里写的 656
+```
+
+**原因不是代码，是文档**：每日窗口只覆盖 7 天。656 = **600 行历史 + 56 行窗口**，而全新库没有 600 行的基线——计划 §2.7 ③ 的"行数 = 656"漏了回填这一步。
+
+**处置（改 README，不改代码）**：根 `README.md` 与 `week3/README.md` 各加一条"空库先回填 9/1–11/14"。补完回填再跑：
+
+```text
+run_daily --start 2026-09-01 --end 2026-11-14 --reuse-raw  → rows_loaded=600
+run_daily --reuse-raw                                      → fact_total=656，exit 0
+ops.v_last_runs：3 行，全部 exit_code=0
+```
+
+**这条的价值**：如果没做 clone 自测，第一个拿到这个仓库的人（或 12 月的我）会在第一步就看到 56，然后怀疑是管道写错了。**"别人能不能跑"和"我能不能跑"是两个验收项。**
+
+## 3. ops 记账实况（2026-11-22 16:00）
 
 ```text
  run_id | window_start | window_end | rows_loaded | exit_code | duration_s
@@ -106,13 +127,14 @@ check_result: pre 40 行 / 1 失败，post 30 行 / 1 失败
 
 **run 4 是最有用的一行**：`rows_loaded` 为 NULL、`exit_code=1`——"跑了但没写成"和"没跑"是两回事，这一行把前者留了下来。
 
-## 3. 复盘三问
+## 4. 复盘三问
 
 **① 卡在哪（这次是压缩执行，卡点来自"没预料到的环境细节"）**
 
 - Git Bash 改写 `/tmp` 路径（1 次，10 秒定位，因为计划里写了）；
 - `Rename-Item` 对 `.env` 报"路径或设备名称"（1 次，换 `-LiteralPath` 解决）；
-- 计划任务里 `docker info` 要 20 秒，导致一次运行 29.92 s（不是 bug，是任务环境冷启动）。
+- 计划任务里 `docker info` 要 20 秒，导致一次运行 29.92 s（不是 bug，是任务环境冷启动）；
+- clone 自测第一次只得到 56 行（10 分钟定位）——不是代码错，是文档漏了"空库先回填"。
 
 **② 时间预估修正**
 
@@ -128,7 +150,7 @@ check_result: pre 40 行 / 1 失败，post 30 行 / 1 失败
 具体到动作：11/23、11/24 早上 7:10 各跑一次
 `docker exec pg_meridia psql -U postgres -d weather -c "select * from ops.v_last_runs limit 3;"`，把两行 `exit_code=0` 截图存档，再补进 `SELF-REVIEW`。
 
-## 4. 留给下一手的清单（按顺序）
+## 5. 留给下一手的清单（按顺序）
 
 1. 网页合并 **PR #3**（base `main` ← `week3/pipeline`），然后 `git tag -a v0.3-pipeline` 并 push；
 2. 网页建 **PR #4**（base `main` ← `week4/ops`），合并后 `git tag -a v0.4-ops` 并 push；

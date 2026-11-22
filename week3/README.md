@@ -75,7 +75,10 @@ docker exec pg_meridia psql -U postgres -d weather -f /tmp/metrics.sql
 ```powershell
 # 一次性：建运维表（幂等，可反复跑）
 docker cp week4\sql\ops.sql pg_meridia:/tmp/ops.sql
-docker exec pg_meridia psql -U postgres -d weather -v ON_ERROR_STOP=1 -f //tmp/ops.sql
+docker exec pg_meridia psql -U postgres -d weather -v ON_ERROR_STOP=1 -f /tmp/ops.sql
+
+# 一次性（空库才需要）：回填 9/1–11/14 的 600 行基线
+python week4\run_daily.py --start 2026-09-01 --end 2026-11-14 --reuse-raw
 
 # 注册每天 07:00（窗口 = 昨天往前 7 天；-RunNow 会立刻触发一次做验证）
 cd week4\scripts; .\register_task.ps1 -Time 07:00
@@ -87,6 +90,9 @@ python week4\run_daily.py
 docker exec pg_meridia psql -U postgres -d weather -c "select * from ops.v_last_runs;"
 docker exec pg_meridia psql -U postgres -d weather -c "select * from ops.v_open_alerts;"
 ```
+
+> **空库为什么先回填**：每日窗口只覆盖 7 天（56 行）。656 = 600 行历史 + 56 行窗口；不回填会看到 `fact_total=56`。
+> Git Bash 里 `/tmp/ops.sql` 会被改写成 Windows 路径，要写 `//tmp/ops.sql`。
 
 **退出码**：`0` 成功 ｜ `1` 数据质量 ｜ `2` 环境（Docker/.env/连不上库）｜ `3` 上游（HTTP 4xx/5xx）。
 计划任务的 `LastTaskResult` 不是 `0x0` 就是失败——**别用"去看看日志"代替看退出码**，那正是 07:00 无人值守时没人做的事。

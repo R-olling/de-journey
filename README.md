@@ -67,10 +67,15 @@ python run.py --start 2026-09-01 --end 2026-11-14
 ```powershell
 docker start pg_meridia
 docker cp week4\sql\ops.sql pg_meridia:/tmp/ops.sql
-docker exec pg_meridia psql -U postgres -d weather -v ON_ERROR_STOP=1 -f //tmp/ops.sql
-python week4\run_daily.py --start 2026-11-15 --end 2026-11-21   # 期望 fact_total=656、exit 0
-cd week4\scripts; .\register_task.ps1 -Time 07:00 -RunNow        # 每天 07:00 + 立刻验证一次
+docker exec pg_meridia psql -U postgres -d weather -v ON_ERROR_STOP=1 -f /tmp/ops.sql
+python week4\run_daily.py --start 2026-09-01 --end 2026-11-14 --reuse-raw  # 首次回填：600 行
+python week4\run_daily.py --reuse-raw                                      # 每日窗口：656 行
+cd week4\scripts; .\register_task.ps1 -Time 07:00 -RunNow                  # 每天 07:00 + 立刻验证一次
 ```
+
+（Git Bash 里 `/tmp/ops.sql` 会被改写成 Windows 路径，要写 `//tmp/ops.sql`。）
+
+**空库必须先回填**：每日窗口只跑 7 天（56 行），656 = 600 行的历史 + 56 行的当日窗口。跳过回填会看到 `fact_total=56`，那不是 bug。
 
 退出码 `0/1/2/3` = 成功 / 数据质量 / 环境 / 上游；设计与取舍见 `week4/decisions.md`，契约见 `week4/DATA_CONTRACT.md`，事故演练见 `week4/INCIDENT-2026-11-22.md`。
 
