@@ -90,7 +90,9 @@ ERROR ENV 缺 D:\code\de-journey\week3\.env：从 .env.example 复制并填 PG_P
 
 **盲写时才想明白的一件事**：`isinstance(pd.Timestamp(...), datetime.date)` 是 **True**——所以"先判 date"的顺序会让 Timestamp 原样通过（发给 `date` 列时 Postgres 隐式转换，不报错，但 `type(x).__name__` 是 `Timestamp`）。真实管道里 `date_key` 已经是 `date`，所以两者跑起来一样；差别只在"有人直接喂 DataFrame"的时候。计划 §2.6 的用例正是要抓这个。
 
-## 2. clone 自测发现的一个文档缺口（计划 §2.7 ③）
+## 2. 两个"跑起来才看得见"的发现
+
+### 2.1 clone 自测暴露的文档缺口（计划 §2.7 ③）
 
 假装自己是别人：`git clone -b week4/ops` 到 `D:\code\_u4_clone`，`python -m venv .venv` + `pip install -r requirements.txt`（2 分 23 秒，有缓存），建 `weather_clone` 库，跑 `init.sql`（8 城 / 365 天日历）+ `ops.sql`，然后照 README 跑：
 
@@ -110,6 +112,19 @@ ops.v_last_runs：3 行，全部 exit_code=0
 ```
 
 **这条的价值**：如果没做 clone 自测，第一个拿到这个仓库的人（或 12 月的我）会在第一步就看到 56，然后怀疑是管道写错了。**"别人能不能跑"和"我能不能跑"是两个验收项。**
+
+### 2.2 raw 存原文的副作用：`generationtime_ms` 每次都变
+
+三次任务触发后 `git status` 显示 8 个 raw 文件全部"已修改"。查 diff 发现：
+
+```text
+-generationtime_ms":0.20194053649902344
++generationtime_ms":0.31745433807373047
+```
+
+`daily` 里的温度、降水一个字节都没变——变的是"本次请求耗时"这个服务端字段。
+这是 ADR-01（raw 存原文）的必然代价：**同样的数据重抓一次，Git 里也会有 diff**。
+处置：写进 ADR-01 的"代价"，并记住判据——**raw 有 diff 不等于数据变了，要看 `daily` 里的数字**。
 
 ## 3. ops 记账实况（2026-11-22 16:00）
 
