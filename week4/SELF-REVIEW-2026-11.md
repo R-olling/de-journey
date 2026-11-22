@@ -6,7 +6,7 @@
 
 - **4 个单元**：week0/1 环境与 pandas、week2 SQL、week3 管道、week4 运维；仓库 **41** 个 commit（`main` 26 + `week3/pipeline` 7 + `week4/ops` 8，PR 合并后计入主干）。
 - **一条能每天自己跑的管道**：600 → **656** 行，8 城 × 82 天，**14 条**校验（pre 8 + post 6），**4 级**退出码（0/1/2/3 全演过）。
-- **一套运维证据**：`ops.pipeline_run` 7 行、`ops.check_result` 84 行（1 条失败）、计划任务 `LastTaskResult=0x0`、日志 `week4/logs/daily-*.log`。
+- **一套运维证据**：`ops.pipeline_run` / `ops.check_result`（每次运行 1 行 + 14 条校验；验收时 **8 行 / 98 行**，其中 1 条失败）、计划任务 `LastTaskResult=0x0`、日志 `week4/logs/daily-*.log`。
 - **一套能讲的东西**：3 行简历、5 个面试问答（各带一层追问）、5 条 ADR、一份数据契约、一份事故记录、闭卷小测 5 题。
 - **还了一笔债**：盲写 `load.py`（`week4/rewrite_load.py`），断言 `before == after == 656`，并自己发现了 `pd.Timestamp` 是 `date` 子类这个顺序坑。
 

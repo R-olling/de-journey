@@ -126,7 +126,9 @@ ops.v_last_runs：3 行，全部 exit_code=0
 这是 ADR-01（raw 存原文）的必然代价：**同样的数据重抓一次，Git 里也会有 diff**。
 处置：写进 ADR-01 的"代价"，并记住判据——**raw 有 diff 不等于数据变了，要看 `daily` 里的数字**。
 
-## 3. ops 记账实况（2026-11-22 16:00）
+## 3. ops 记账实况（2026-11-22 16:00，验收前快照）
+
+> 下表是快照；验收时会再多几次运行（现在 8 行 / 98 条）。**判据是形状，不是绝对值**：一次运行一行、每次 14 条、失败的那次 `rows_loaded` 为 NULL。
 
 ```text
  run_id | window_start | window_end | rows_loaded | exit_code | duration_s
