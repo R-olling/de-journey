@@ -47,6 +47,19 @@ miss_rate=0.381 median_hours=72.258 mean_rating=4.199
 想看六问是怎么推出来的，用 VS Code 打开 `week1/analysis.ipynb`，Kernel 选 **Python (de-journey .venv)**，然后 `Restart & Run All`。
 （若列表里没有这个内核：`.venv\Scripts\python.exe -m ipykernel install --user --name de-journey --display-name "Python (de-journey .venv)"`，再 Reload Window。）
 
+## week3 · 第一条可重跑的管道
+
+`week3/` 把 open-meteo 的 8 城 × 75 天天气抽到 PostgreSQL：一条命令 600 行，重跑仍是 600。
+
+```powershell
+docker start pg_meridia
+cd week3
+python run.py --start 2026-09-01 --end 2026-11-14
+# 期望：check ×6 OK / transform rows=600 / load stg=600 fact_total=600
+```
+
+架构图、六条命令、三个取舍与已知限制见 `week3/README.md`；列定义见 `week3/DATA_DICTIONARY.md`。
+
 ## 设计取舍
 
 ### week0
