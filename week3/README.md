@@ -68,9 +68,40 @@ docker exec pg_meridia psql -U postgres -d weather -f /tmp/metrics.sql
 3. **psycopg 手写 upsert，不用 `df.to_sql()`**
    不这样做：`to_sql` 对非 SQLite 只支持 SQLAlchemy 引擎；且 `DO UPDATE` 更新哪 11 列、`NaN→NULL` 怎么转，都在别人代码里，出问题查不到。
 
+## 每日运行与排错（单元 4 加的）
+
+这条管道现在由 `week4/run_daily.py` 每天跑，本目录的 `run.py` 降级为"手动全量/回填"入口。
+
+```powershell
+# 一次性：建运维表（幂等，可反复跑）
+docker cp week4\sql\ops.sql pg_meridia:/tmp/ops.sql
+docker exec pg_meridia psql -U postgres -d weather -v ON_ERROR_STOP=1 -f //tmp/ops.sql
+
+# 注册每天 07:00（窗口 = 昨天往前 7 天；-RunNow 会立刻触发一次做验证）
+cd week4\scripts; .\register_task.ps1 -Time 07:00
+
+# 手动跑一次（等价于 07:00 那次；--reuse-raw 不联网重放本地 raw）
+python week4\run_daily.py
+
+# 看结果
+docker exec pg_meridia psql -U postgres -d weather -c "select * from ops.v_last_runs;"
+docker exec pg_meridia psql -U postgres -d weather -c "select * from ops.v_open_alerts;"
+```
+
+**退出码**：`0` 成功 ｜ `1` 数据质量 ｜ `2` 环境（Docker/.env/连不上库）｜ `3` 上游（HTTP 4xx/5xx）。
+计划任务的 `LastTaskResult` 不是 `0x0` 就是失败——**别用"去看看日志"代替看退出码**，那正是 07:00 无人值守时没人做的事。
+
+**三条排查命令（按顺序）**：
+
+1. `(Get-ScheduledTaskInfo -TaskName de-journey-weather-daily).LastTaskResult` —— 跑没跑、成没成（`0x41303` = 从未运行，不是错误）；
+2. `Get-ChildItem week4\logs -Filter daily-*.log | Sort-Object LastWriteTime -Descending | Select -First 1` —— 最后一次的完整过程；
+3. `select * from ops.v_open_alerts;` —— 哪条校验没过、具体数值。
+
+> 为什么要写退出码而不是"命令怎么跑"：命令只在你记得的时候有用，退出码是**无人值守时的唯一信号**。
+
 ## 已知限制
 
-- **单机、单用户、无调度**：定时与重试策略在单元 4。
+- **调度依赖"用户已登录 + Docker Desktop 已起"**：07:00 关机/注销不会跑；`StartWhenAvailable` 只补"错过的触发"，不补"跑失败了"（无重试）。
 - **600 行用 `executemany`**：到 600 万行要换 `COPY`，upsert 会产生表膨胀，指标查询要加索引。
 - **`date_key` 是城市本地日**（`timezone=auto`）：跨城比较"同一天"时，中法两地差 6–7 小时，含义不同。
 - **指标 SQL 里阈值仍是字面量 1.0**：`transform.py` 有 `PRECIP_THRESHOLD_MM` 常量，但 `metrics.sql` 是独立文件，改口径要两边同时改（单元 4 用参数化 SQL 收口）。
