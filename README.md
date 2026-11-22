@@ -136,8 +136,6 @@ cd week4\scripts; .\register_task.ps1 -Time 07:00 -RunNow                  # 每
 
 ### week2–week4
 
-取舍不抄到这里，避免两处说法不同步：
-
 - **week2**：4 张表、`ON CONFLICT` 幂等、7 KPI 对账 → `week2/NOTES.md`
 - **week3**：raw 存响应原文 / stg 全可空 + 每次 TRUNCATE / 手写 upsert 不用 `to_sql` → `week3/README.md`「三个取舍」
 - **week4**：7 天滚动窗口、计划任务不上 Airflow 等 **5 条 ADR**（每条都有"什么时候推翻"）→ `week4/decisions.md`
