@@ -91,12 +91,34 @@ def fetch_city(city_id: str, lat: float, lon: float, start: str, end: str) -> by
     raise RuntimeError(f"{city_id}: 重试 {MAX_RETRY} 次仍失败")
 
 
-def save_city(city_id: str, content: bytes, start: str, end: str) -> Path:
+def save_city(city_id: str, content: bytes, start: str, end: str,
+              raw_dir: Path = RAW_DIR) -> Path:
     """把响应原文落盘。纯 IO，不发网络请求，可以单独测。"""
-    RAW_DIR.mkdir(parents=True, exist_ok=True)
-    path = RAW_DIR / f"{city_id}_{start}_{end}.json"
+    raw_dir.mkdir(parents=True, exist_ok=True)
+    path = raw_dir / f"{city_id}_{start}_{end}.json"
     path.write_bytes(content)      # ← 写字节，不是 write_text
     return path
+
+
+def extract_all(start: str, end: str, raw_dir: Path = RAW_DIR) -> list[dict]:
+    """遍历全部城市抽取并落盘，返回每城一条记录。
+
+    这个函数**不配置 logging** —— 谁调用它谁负责配置（run.py 要同时写屏幕和文件，
+    CLI 只要屏幕）。函数里一配置，调用方的设置就被覆盖了。
+    """
+    records = []
+    for city_id, geo in CITIES.items():
+        t0 = time.perf_counter()
+        content = fetch_city(city_id, geo["lat"], geo["lon"], start, end)
+        path = save_city(city_id, content, start, end, raw_dir)
+        elapsed = time.perf_counter() - t0
+        log.info(
+            "extract %-10s %6d bytes %.2fs -> %s",
+            city_id, len(content), elapsed, path.name,
+        )
+        records.append({"city_id": city_id, "path": path,
+                        "bytes": len(content), "seconds": elapsed})
+    return records
 
 
 def main(start: str, end: str) -> int:
@@ -106,20 +128,9 @@ def main(start: str, end: str) -> int:
         datefmt="%H:%M:%S",
     )
 
-    total_bytes = 0
-    for city_id, geo in CITIES.items():
-        t0 = time.perf_counter()
-        content = fetch_city(city_id, geo["lat"], geo["lon"], start, end)
-        path = save_city(city_id, content, start, end)
-        elapsed = time.perf_counter() - t0
-        total_bytes += len(content)
-        log.info(
-            "extract %-10s %6d bytes %.2fs -> %s",
-            city_id, len(content), elapsed, path.name,
-        )
-
-    n = len(CITIES)
-    log.info("%d files, %d bytes", n, total_bytes)
+    records = extract_all(start, end)
+    total_bytes = sum(r["bytes"] for r in records)
+    log.info("%d files, %d bytes", len(records), total_bytes)
     return 0
 
 
